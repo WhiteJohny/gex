@@ -270,7 +270,38 @@ init_dist = count_dist(back_from_idx, back_to_idx)
 
 
 def backtracking(curr_idx, path, prev_dist, prev_movement_idx):
-    pass
+    if curr_idx == 45860:
+        return path
+
+    curr_point = hills_map[curr_idx][:3]
+    for movement_idx, movement in enumerate(ALL_MOVEMENTS):
+        if movement_idx == prev_movement_idx:
+            continue
+
+        new_point = curr_point + movement
+
+        new_point_idx = np.where((hills_map[:, :3] == new_point).all(axis=1))[0]
+        if new_point_idx.size == 0:
+            continue
+        new_point_idx = new_point_idx[0]
+
+        new_dist = count_dist(new_point_idx, 45860)
+        if new_dist > 2 * init_dist or new_dist > prev_dist:
+            continue
+
+        if new_point_idx in path:
+            continue
+
+        result = backtracking(new_point_idx, path + [new_point_idx], new_dist, (movement_idx + 3) % 6)
+        if result is not None:
+            return result
+
+    return None
+
+back_path = backtracking(back_from_idx, [back_from_idx], init_dist, -1)
+
+visualize_solve(back_path)
+
 
 
 greedy_path = [back_from_idx]
